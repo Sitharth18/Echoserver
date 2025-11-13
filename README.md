@@ -24,53 +24,43 @@ server.py
 ```
 import socket
 
-# Create a TCP/IP socket
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-# Bind the socket to an address and port
-server_socket.bind(('localhost', 12345))
-server_socket.listen(1)
+HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
+PORT = 65432  # Port to listen on (non-privileged ports are > 1023)
 
-print("Server is listening on port 12345...")
 
-# Wait for a connection
-conn, addr = server_socket.accept()
-print(f"Connected by {addr}")
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    s.bind((HOST, PORT))
+    s.listen()
+    conn, addr = s.accept()
+    with conn:
+        print(f"Connected by {addr}")
+        while True:
+            data = conn.recv(1024)
+            if not data:
+                break
+            conn.sendall(data)
 
-while True:
-    data = conn.recv(1024)
-    if not data:  # If no data, client closed connection
-        break
-    print(f"Received from client: {data.decode()}")
-    conn.sendall(data)  # Echo back the same data
-
-conn.close()
 ```
 client.py
 ```
 import socket
 
-# Create a TCP/IP socket
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-# Connect to the server
-client_socket.connect(('localhost', 12345))
+HOST = "127.0.0.1"  # The server's hostname or IP address
+PORT = 65432  # The port used by the server
 
-while True:
-    msg = input("Enter message (type 'exit' to quit): ")
-    if msg.lower() == 'exit':
-        break
-    client_socket.sendall(msg.encode())
-    data = client_socket.recv(1024)
-    print(f"Echo from server: {data.decode()}")
 
-client_socket.close()
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    s.connect((HOST, PORT))
+    s.sendall(b"Hello, world")
+    data = s.recv(1024)
+
+
+print(f"Received {data!r}")
 ```
 
 ## OUTPUT:
-![s s](https://github.com/user-attachments/assets/9ccf3c20-946d-4821-8565-dc1b399d77e4)
-
-![c s](https://github.com/user-attachments/assets/5d975c97-3ec0-4eaa-98b9-d89c8980d9f9)
-
+![out]](image/output.png)
 ## RESULT:
 The program is executed successfully
